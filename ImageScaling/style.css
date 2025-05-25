@@ -1,0 +1,96 @@
+/* 基础样式 */
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f2f5;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #1a1a1a;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* 控件区域样式 */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+input[type="file"] {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+input[type="number"] {
+    width: 100px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* 新增控件样式 */
+.preview-size {
+    margin-top: 10px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+#downloadBtn {
+    background-color: #4CAF50;
+    padding: 10px 20px;
+    margin-left: 10px;
+}
+
+#downloadBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* 预览区域样式 */
+.preview-container {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+#previewCanvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
