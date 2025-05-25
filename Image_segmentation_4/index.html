@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图像分割工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .image-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        canvas {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        label {
+            font-weight: bold;
+        }
+        .loading {
+            display: none;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>图像分割工具</h1>
+    <div class="container">
+        <div class="control-panel">
+            <input type="file" id="imageInput" accept="image/*">
+            <label for="modeSelect">分割模式:</label>
+            <select id="modeSelect">
+                <option value="basic">基础模式 (几何形状)</option>
+            </select>
+            <button id="processBtn">处理图像</button>
+            <button id="downloadBtn" disabled>下载结果</button>
+            <span id="loadingText" class="loading">处理中...</span>
+        </div>
+        
+        <div class="image-container">
+            <div class="image-box">
+                <h3>原始图像</h3>
+                <canvas id="originalCanvas"></canvas>
+            </div>
+            <div class="image-box">
+                <h3>分割结果</h3>
+                <canvas id="resultCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const imageInput = document.getElementById('imageInput');
+        const modeSelect = document.getElementById('modeSelect');
+        const processBtn = document.getElementById('processBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const resultCanvas = document.getElementById('resultCanvas');
+        const loadingText = document.getElementById('loadingText');
+        
+        let originalImage = null;
+        let processedImage = null;
+
+        // 监听图像上传
+        imageInput.addEventListener('change', function(e) {
+            if (e.target.files.length === 0) return;
+            
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                originalImage = new Image();
+                originalImage.onload = function() {
+                    drawImageToCanvas(originalImage, originalCanvas);
+                    resultCanvas.width = originalImage.width;
+                    resultCanvas.height = originalImage.height;
+                    downloadBtn.disabled = true;
+                };
+                originalImage.src = event.target.result;
+            };
+            
+            reader.readAsDataURL(file);
+        });
+
+        // 处理按钮点击事件
+        processBtn.addEventListener('click', function() {
+            if (!originalImage) {
+                alert('请先上传图像');
+                return;
+            }
+            
+            loadingText.style.display = 'inline';
+            processBtn.disabled = true;
+            
+            // 使用setTimeout让UI有时间更新
+            setTimeout(() => {
+                processImage();
+                loadingText.style.display = 'none';
+                processBtn.disabled = false;
+                downloadBtn.disabled = false;
+            }, 100);
+        });
+
+        // 下载按钮点击事件
+        downloadBtn.addEventListener('click', function() {
+            if (!processedImage) return;
+            
+            const link = document.createElement('a');
+            link.download = 'segmented_image.png';
+            link.href = resultCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // 将图像绘制到Canvas
+        function drawImageToCanvas(image, canvas) {
+            canvas.width = image.width;
+            canvas.height = image.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        }
+
+        // 图像处理函数
+        function processImage() {
+            const mode = modeSelect.value;
+            const ctx = resultCanvas.getContext('2d');
+            
+            // 绘制原始图像
+            ctx.drawImage(originalImage, 0, 0, resultCanvas.width, resultCanvas.height);
+            
+            if (mode === 'basic') {
+                // 基础模式 - 几何形状检测
+                detectGeometricShapes(ctx);
+            } else if (mode === 'advanced') {
+                alert('高级模式需要后端支持，当前仅演示基础模式');
+            }
+            
+            processedImage = resultCanvas.toDataURL('image/png');
+        }
+
+        // 几何形状检测
+        function detectGeometricShapes(ctx) {
+            // 创建临时Canvas进行图像处理
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = originalImage.width;
+            tempCanvas.height = originalImage.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(originalImage, 0, 0);
+            
+            // 获取图像数据
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            
+            // 转换为灰度
+            for (let i = 0; i < data.length; i += 4) {
+                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = avg;     // R
+                data[i + 1] = avg;  // G
+                data[i + 2] = avg;  // B
+            }
+            tempCtx.putImageData(imageData, 0, 0);
+            
+            // 边缘检测 (简化版)
+            const edgeData = simpleEdgeDetection(tempCtx, tempCanvas.width, tempCanvas.height);
+            tempCtx.putImageData(edgeData, 0, 0);
+            
+            // 查找轮廓 (简化版)
+            const contours = findContours(edgeData);
+            
+            // 绘制检测到的形状
+            drawDetectedShapes(ctx, contours);
+        }
+
+        // 简单边缘检测
+        function simpleEdgeDetection(ctx, width, height) {
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            const output = new ImageData(width, height);
+            const outputData = output.data;
+            
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const i = (y * width + x) * 4;
+                    
+                    // 简单的Sobel算子
+                    const gx = 
+                        -1 * data[((y-1)*width + (x-1))*4] + 
+                         1 * data[((y-1)*width + (x+1))*4] +
+                        -2 * data[(y*width + (x-1))*4] + 
+                         2 * data[(y*width + (x+1))*4] +
+                        -1 * data[((y+1)*width + (x-1))*4] + 
+                         1 * data[((y+1)*width + (x+1))*4];
+                    
+                    const gy = 
+                        -1 * data[((y-1)*width + (x-1))*4] + 
+                        -2 * data[((y-1)*width + x)*4] + 
+                        -1 * data[((y-1)*width + (x+1))*4] +
+                         1 * data[((y+1)*width + (x-1))*4] + 
+                         2 * data[((y+1)*width + x)*4] + 
+                         1 * data[((y+1)*width + (x+1))*4];
+                    
+                    const magnitude = Math.sqrt(gx * gx + gy * gy);
+                    const edgeValue = magnitude > 50 ? 255 : 0;
+                    
+                    outputData[i] = edgeValue;
+                    outputData[i + 1] = edgeValue;
+                    outputData[i + 2] = edgeValue;
+                    outputData[i + 3] = 255;
+                }
+            }
+            
+            return output;
+        }
+
+        // 查找轮廓 (简化版)
+        function findContours(edgeData) {
+            // 这是一个非常简化的轮廓查找实现
+            // 实际应用中应该使用更复杂的算法
+            
+            const width = edgeData.width;
+            const height = edgeData.height;
+            const data = edgeData.data;
+            const visited = new Array(width * height).fill(false);
+            const contours = [];
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const i = y * width + x;
+                    if (!visited[i] && data[i * 4] > 128) {
+                        // 找到一个新的轮廓
+                        const contour = [];
+                        const stack = [[x, y]];
+                        visited[i] = true;
+                        
+                        while (stack.length > 0) {
+                            const [cx, cy] = stack.pop();
+                            contour.push([cx, cy]);
+                            
+                            // 检查8邻域
+                            for (let ny = Math.max(0, cy - 1); ny <= Math.min(height - 1, cy + 1); ny++) {
+                                for (let nx = Math.max(0, cx - 1); nx <= Math.min(width - 1, cx + 1); nx++) {
+                                    const ni = ny * width + nx;
+                                    if (!visited[ni] && data[ni * 4] > 128) {
+                                        visited[ni] = true;
+                                        stack.push([nx, ny]);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (contour.length > 20) {  // 忽略太小的轮廓
+                            contours.push(contour);
+                        }
+                    }
+                }
+            }
+            
+            return contours;
+        }
+
+        // 绘制检测到的形状
+        function drawDetectedShapes(ctx, contours) {
+            // 定义形状颜色
+            const shapeColors = {
+                'triangle': 'rgba(255, 0, 0, 0.5)',
+                'rectangle': 'rgba(0, 255, 0, 0.5)',
+                'square': 'rgba(0, 0, 255, 0.5)',
+                'pentagon': 'rgba(255, 255, 0, 0.5)',
+                'circle': 'rgba(255, 0, 255, 0.5)',
+                'unknown': 'rgba(0, 255, 255, 0.5)'
+            };
+            
+            contours.forEach(contour => {
+                if (contour.length < 5) return;
+                
+                // 计算轮廓中心
+                let centerX = 0, centerY = 0;
+                contour.forEach(([x, y]) => {
+                    centerX += x;
+                    centerY += y;
+                });
+                centerX /= contour.length;
+                centerY /= contour.length;
+                
+                // 简化多边形
+                const epsilon = 0.01 * contour.length;
+                const simplified = [];
+                let prevAdded = contour[0];
+                simplified.push(prevAdded);
+                
+                for (let i = 1; i < contour.length; i++) {
+                    const [x, y] = contour[i];
+                    const [px, py] = prevAdded;
+                    const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
+                    
+                    if (dist > epsilon) {
+                        simplified.push([x, y]);
+                        prevAdded = [x, y];
+                    }
+                }
+                
+                // 识别形状
+                let shapeType = 'unknown';
+                const vertexCount = simplified.length;
+                
+                if (vertexCount === 3) {
+                    shapeType = 'triangle';
+                } else if (vertexCount === 4) {
+                    // 区分正方形和矩形
+                    const [x1, y1] = simplified[0];
+                    const [x2, y2] = simplified[1];
+                    const [x3, y3] = simplified[2];
+                    const [x4, y4] = simplified[3];
+                    
+                    const d1 = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                    const d2 = Math.sqrt((x3 - x2) ** 2 + (y3 - y2) ** 2);
+                    const ratio = Math.max(d1, d2) / Math.min(d1, d2);
+                    
+                    shapeType = ratio < 1.2 ? 'square' : 'rectangle';
+                } else if (vertexCount === 5) {
+                    shapeType = 'pentagon';
+                } else if (vertexCount > 8) {
+                    // 可能是圆形
+                    const [x, y] = simplified[0];
+                    const radius = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                    let isCircle = true;
+                    
+                    for (let i = 1; i < simplified.length; i++) {
+                        const [cx, cy] = simplified[i];
+                        const currentRadius = Math.sqrt((cx - centerX) ** 2 + (cy - centerY) ** 2);
+                        if (Math.abs(currentRadius - radius) > radius * 0.2) {
+                            isCircle = false;
+                            break;
+                        }
+                    }
+                    
+                    if (isCircle) {
+                        shapeType = 'circle';
+                    }
+                }
+                
+                // 绘制形状
+                ctx.fillStyle = shapeColors[shapeType];
+                ctx.beginPath();
+                ctx.moveTo(simplified[0][0], simplified[0][1]);
+                
+                for (let i = 1; i < simplified.length; i++) {
+                    ctx.lineTo(simplified[i][0], simplified[i][1]);
+                }
+                
+                ctx.closePath();
+                ctx.fill();
+                
+                // 绘制轮廓
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 添加标签
+                ctx.fillStyle = 'black';
+                ctx.font = '14px Arial';
+                ctx.fillText(shapeType.toUpperCase(), centerX - 20, centerY);
+            });
+        }
+    </script>
+</body>
+</html>
