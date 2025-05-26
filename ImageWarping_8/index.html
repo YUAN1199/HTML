@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>图像仿射变换演示</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h2>原始图像</h2>
+            <input type="file" id="upload" accept="image/*">
+            <canvas id="sourceCanvas"></canvas>
+            <div class="points" id="sourcePoints">已选0/3点</div>
+        </div>
+        
+        <div class="panel">
+            <h2>目标图像</h2>
+            <canvas id="targetCanvas"></canvas>
+            <div class="points" id="targetPoints">已选0/3点</div>
+            <button id="transformBtn" disabled>执行变换</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

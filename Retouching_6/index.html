@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>图像修饰工具</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>图像修饰工具</h1>
+        <input type="file" id="upload" accept="image/*">
+        <canvas id="canvas"></canvas>
+        <div class="tools">
+            <button onclick="applyMosaic()">应用马赛克</button>
+            <button onclick="applyErase()">擦除颜色</button>
+            <button onclick="download()">下载图片</button>
+            <input type="color" id="eraseColor" value="#ffffff">
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

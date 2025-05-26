@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spline Interpolation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="drawCanvas"></canvas>
+    <div class="controls">
+        <button id="toggleInterpolation">Toggle Interpolation</button>
+        <button id="clear">Clear</button>
+        <div class="slider-container">
+            <label for="tension">曲线张力:</label>
+            <input type="range" id="tension" min="0" max="1" step="0.1" value="0.5">
+            <span id="tensionValue">0.5</span>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
