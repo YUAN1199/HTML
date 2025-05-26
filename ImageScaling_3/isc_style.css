@@ -1,0 +1,115 @@
+/* 基础样式 */
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f0f2f5;
+    color: #1a1a1a;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #1a73e8;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* 上传区域 */
+.upload-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+input[type="range"] {
+    flex: 1;
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+}
+
+/* 预览容器 */
+.preview-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.preview-box {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    background: white;
+}
+
+.preview-box h4 {
+    margin: 0 0 1rem 0;
+    color: #1a73e8;
+}
+
+img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    object-fit: contain;
+    max-height: 400px;
+    background: #f8f9fa;
+}
+
+/* 尺寸信息 */
+.size-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.size-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+/* 下载按钮 */
+button {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+button:hover {
+    background: #1557b0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .preview-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .controls {
+        flex-direction: column;
+    }
+}
